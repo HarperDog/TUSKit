@@ -88,10 +88,8 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
 
             currentUploads?.append(upload)
             if (upload.filePath != nil) {
-                if fileManager.moveFile(atLocation: upload.filePath!, withFileName: fileName) == false{
-                    //fail out
-                    logger.log(forLevel: .Error, withMessage:String(format: "Failed to move file.", upload.id))
-
+                if !fileManager.copyFile(upload.filePath!, toTempFileNamed: fileName) {
+                    logger.log(forLevel: .Error, withMessage:String(format: "Failed to copy file.", upload.id))
                     return
                 }
             } else if(upload.data != nil) {
@@ -241,9 +239,13 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
     /// Update an uploads data, used for persistence - not useful outside of the library
     /// - Parameter upload: the upload object
     func updateUpload(_ upload: TUSUpload) {
-        let needleUploadIndex = currentUploads?.firstIndex(where: { $0.id == upload.id })
-        currentUploads![needleUploadIndex!] = upload
-        var updated = currentUploads
+        guard var currentUploads = currentUploads else { return }
+        guard let index = currentUploads.firstIndex(where: { $0.id == upload.id }) else { return }
+
+        currentUploads[index] = upload
+
+        // FIXME: Trigger serialization of this value without reassigning it to itself.
+        let updated = currentUploads
         self.currentUploads = updated
     }
     
