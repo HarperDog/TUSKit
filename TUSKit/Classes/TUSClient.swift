@@ -169,13 +169,16 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
         for upload in currentUploads! {
             cancel(forUpload: upload)
         }
+        status = .ready
     }
     
     /// Delete all temporary files
     public func cleanUp() {
         for upload in currentUploads! {
+            cancel(forUpload: upload)
             cleanUp(forUpload: upload)
         }
+        status = .ready
     }
     
     
