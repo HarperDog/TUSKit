@@ -84,7 +84,7 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
         
         
         if (fileManager.fileExists(withName: fileName) == false) {
-            logger.log(forLevel: .Info, withMessage:String(format: "File not found in local storage.", upload.id))
+            logger.log(forLevel: .Info, withMessage:String(format: "Temp file for upload %@ does not yet exist", upload.id))
             upload.status = .new
             currentUploads?.append(upload)
             if (upload.filePath != nil) {
