@@ -56,6 +56,14 @@ public class TUSUpload: NSObject, NSCoding {
         }.joined(separator: ",")
     }
     
+    public init(ofFile fileURL: URL, withExtension fileExtension: String, continuingAtURL uploadURL: URL, withID uploadID: String) {
+        self.id = uploadID
+        self.filePath = fileURL
+        self.fileType = fileExtension
+        self.uploadLocationURL = uploadURL
+        self.status = .created
+    }
+    
     public init(withId id: String, andFilePathString filePathString: String, andFileType fileType: String) {
         self.id = id
         filePath = URL(string: filePathString)

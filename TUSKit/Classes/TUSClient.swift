@@ -85,7 +85,7 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
         
         if (fileManager.fileExists(withName: fileName) == false) {
             logger.log(forLevel: .Info, withMessage:String(format: "Temp file for upload %@ does not yet exist", upload.id))
-            upload.status = .new
+
             currentUploads?.append(upload)
             if (upload.filePath != nil) {
                 if fileManager.moveFile(atLocation: upload.filePath!, withFileName: fileName) == false{
@@ -102,6 +102,17 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
                     return
                 }
             }
+
+            switch upload.status {
+            case .some(.created):
+                // If the upload was created previously, we need to get the file size since the upload object isn't responsible for doing that.
+                // TODO: Make the Upload object responsible for getting the size of the file/data given to it.
+                upload.contentLength = "0"
+                upload.uploadOffset = "0"
+                upload.uploadLength = String(fileManager.sizeForLocalFilePath(filePath: String(format: "%@%@", fileManager.fileStorePath(), fileName)))
+            default:
+                upload.status = .new
+            }
         }
          
         
@@ -110,7 +121,7 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
             
             switch upload.status {
             case .paused, .created:
-                logger.log(forLevel: .Info, withMessage:String(format: "File %@ has been previously been created", upload.id))
+                logger.log(forLevel: .Info, withMessage:String(format: "Continuing upload of %@", upload.id))
                 executor.upload(forUpload: upload)
                 break
             case .new:
