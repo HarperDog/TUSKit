@@ -216,8 +216,11 @@ public class TUSClient: NSObject, URLSessionTaskDelegate {
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
-        var upload = currentUploads![0]
-        self.delegate?.TUSProgress(bytesUploaded: Int(upload.uploadOffset!)!, bytesRemaining: Int(upload.uploadLength!)!)
+        guard let upload = currentUploads?[0] else { return }
+        // Since the session performs multiple types of requests, this isn't necessarily upload progress.
+        guard let uploadOffset = upload.uploadOffset, let uploadLength = upload.uploadLength else { return }
+
+        self.delegate?.TUSProgress(bytesUploaded: Int(uploadOffset)!, bytesRemaining: Int(uploadLength)!)
     }
     
     // MARK: Methods for already uploaded files
